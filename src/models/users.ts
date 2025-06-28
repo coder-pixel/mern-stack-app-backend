@@ -1,9 +1,7 @@
 import mongoose from "mongoose";
+import { IUser } from "../types";
 
-export interface IUser extends Document {
-  username: string;
-  email: string;
-  role: "user" | "admin";
+export interface IUserType extends Document, IUser {
   authentication: {
     password: string;
     salt: string;
@@ -11,36 +9,41 @@ export interface IUser extends Document {
   };
 }
 
-const UserScehma = new mongoose.Schema<IUser>({
-  username: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-  },
-  role: {
-    type: String,
-    required: true,
-    enum: ["user", "admin"],
-    default: "user",
-  },
-  authentication: {
-    password: {
+const UserScehma = new mongoose.Schema<IUserType>(
+  {
+    username: {
       type: String,
       required: true,
-      select: false, // In Mongoose, setting select: false for a field in a schema means that this field will be excluded by default when querying documents from the database.
     },
-    salt: {
+    email: {
       type: String,
-      select: false,
+      required: true,
     },
-    sessionToken: {
+    role: {
       type: String,
-      select: false,
+      required: true,
+      enum: ["user", "admin"],
+      default: "user",
+    },
+    authentication: {
+      password: {
+        type: String,
+        required: true,
+        select: false, // In Mongoose, setting select: false for a field in a schema means that this field will be excluded by default when querying documents from the database.
+      },
+      salt: {
+        type: String,
+        select: false,
+      },
+      sessionToken: {
+        type: String,
+        select: false,
+      },
     },
   },
-});
+  {
+    timestamps: true,
+  }
+);
 
-export const User = mongoose.model<IUser>("User", UserScehma);
+export const User = mongoose.model<IUserType>("User", UserScehma);
