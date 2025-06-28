@@ -7,6 +7,7 @@ import bodyParser from "body-parser";
 import { connectDB } from "./config/db";
 
 import routes from "./routes";
+import { errorHandler } from "./middlewares/errorHandler";
 
 require("dotenv").config(); // Load environment variables - need to be at top
 
@@ -30,6 +31,12 @@ app.use("/api", routes); // => /api/v1 -> define the prefix with version
 app.get("/", (req: Request, res: Response) => {
   res.send("Server running  dfg just fine");
 });
+
+app.get("/error-test", () => {
+  throw new Error("Test error");
+});
+
+app.use(errorHandler); // => global error handler -> need to be added after all the routes, otherwise it will not catch the route errors
 
 const startServer = async () => {
   try {
