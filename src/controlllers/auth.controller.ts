@@ -6,7 +6,7 @@ import { AppError } from "../utils/AppError";
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   // try {
-  const { email, password, username } = req.body;
+  const { email, password, username, role } = req.body;
 
   if (!email || !username || !password) {
     throw new AppError("Some required fields are missing", 400);
@@ -30,11 +30,17 @@ export const register = async (req: Request, res: Response): Promise<void> => {
   const newUser = await createUser({
     email,
     username,
+    role,
     authentication: { password: hashed },
   });
 
   // now generate jwt token, to be sent back to the client
-  const token = generateToken({ id: newUser?._id, role: newUser?.role });
+  const token = generateToken({
+    id: newUser?._id,
+    role: newUser?.role,
+    email: newUser?.email,
+    username: newUser?.username,
+  });
 
   // send the token back to the client
   res

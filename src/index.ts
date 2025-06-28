@@ -32,6 +32,14 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Server running  dfg just fine");
 });
 
+app.get(
+  "/dashboard",
+  checkAuthentication,
+  (req: AuthenticatedRequest, res: Response) => {
+    res.send({ message: "You are authenticated!", user: req.user });
+  }
+);
+
 app.get("/error-test", () => {
   throw new Error("Test error");
 });
