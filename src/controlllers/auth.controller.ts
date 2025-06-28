@@ -69,7 +69,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     // return;
   }
 
-  const token = generateToken({ id: user?._id, role: user?.role });
+  const token = generateToken({
+    id: user?._id,
+    role: user?.role,
+    email: user?.email,
+    username: user?.username,
+    // can add more fields here, if needed, to be sent back to the client in the jwt token
+  });
 
   res.status(200).json({ error: false, token });
   // } catch (error) {
