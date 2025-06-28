@@ -26,23 +26,7 @@ app.use(bodyParser.json());
 
 const PORT = process.env.PORT || 8080;
 
-app.use("/api", routes); // => /api/v1 -> define the prefix with version
-
-app.get("/", (req: Request, res: Response) => {
-  res.send("Server running  dfg just fine");
-});
-
-app.get(
-  "/dashboard",
-  checkAuthentication,
-  (req: AuthenticatedRequest, res: Response) => {
-    res.send({ message: "You are authenticated!", user: req.user });
-  }
-);
-
-app.get("/error-test", () => {
-  throw new Error("Test error");
-});
+app.use("/api/v1", routes); // => /api/v1 -> define the prefix with version
 
 app.use(errorHandler); // => global error handler -> need to be added after all the routes, otherwise it will not catch the route errors
 
