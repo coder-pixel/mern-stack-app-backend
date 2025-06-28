@@ -6,12 +6,15 @@ import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import { connectDB } from "./config/db";
 
+import routes from "./routes";
+
 require("dotenv").config(); // Load environment variables - need to be at top
 
 const app = express();
 
 app.use(
   cors({
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
     credentials: true, // impt for how we are gona use our authentication
   })
 );
@@ -20,18 +23,24 @@ app.use(compression());
 app.use(cookieParser()); // used when working with cookies
 app.use(bodyParser.json());
 
-const PORT = process.env.PORT || 9000;
+const PORT = process.env.PORT || 8080;
+
+app.use("/api", routes); // => /api/v1 -> define the prefix with version
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Server running  dfg just fine");
 });
 
 const startServer = async () => {
-  connectDB();
-
-  app.listen(PORT, () => {
-    console.log(`Server listening on port: ${PORT}`);
-  });
+  try {
+    await connectDB();
+    app.listen(PORT as number, "0.0.0.0", () => {
+      console.log(`✅ Server listening on port: ${PORT}`);
+    });
+  } catch (err) {
+    console.error("❌ Server failed to start:", err);
+    process.exit(1);
+  }
 };
 
 startServer();
