@@ -4,4 +4,5 @@ export interface IUser {
   username: string;
   role: "user" | "admin";
   password?: string;
+  state?: string;
 }

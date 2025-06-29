@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
 import { User } from "../models/user";
-import { comparePassword, generateToken, hashPassword } from "../utils/auth";
+import { comparePassword, hashPassword } from "../utils/auth";
 import { createUser, getUserByEmail } from "../services/user.service";
 import { AppError } from "../utils/AppError";
+import { generateUserToken } from "../utils";
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   // try {
-  const { email, password, username, role } = req.body;
+  const { email, password, username, role, state } = req.body;
 
   if (!email || !username || !password) {
     throw new AppError("Some required fields are missing", 400);
@@ -32,16 +33,12 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     username,
     role,
     password: hashed,
+    state,
     // authentication: { password: hashed },
   });
 
   // now generate jwt token, to be sent back to the client
-  const token = generateToken({
-    id: newUser?._id,
-    role: newUser?.role,
-    email: newUser?.email,
-    username: newUser?.username,
-  });
+  const token = generateUserToken(newUser);
 
   // send the token back to the client
   res
@@ -74,13 +71,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     // return;
   }
 
-  const token = generateToken({
-    id: user?._id,
-    role: user?.role,
-    email: user?.email,
-    username: user?.username,
-    // can add more fields here, if needed, to be sent back to the client in the jwt token
-  });
+  const token = generateUserToken(user);
 
   res.status(200).json({ error: false, token });
   // } catch (error) {

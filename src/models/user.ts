@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { IUser } from "../types";
-
+import { INDIAN_STATES_AND_UTS } from "../constants";
 export interface IUserType extends Document, IUser {
   // ------- can be used to add additional fields to the user here -------
   // authentication: {
@@ -31,9 +31,10 @@ const UserScehma = new mongoose.Schema<IUserType>(
       required: true,
       select: false,
     },
-    location: {
+    state: {
       type: String,
       required: false,
+      enum: INDIAN_STATES_AND_UTS,
     },
     // authentication: {
     //   password: {
