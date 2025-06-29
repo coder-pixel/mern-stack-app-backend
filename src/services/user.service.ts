@@ -34,6 +34,17 @@ export const getUserById = async (id: string) => {
 };
 
 /**
+ * Get user by email verification token, to verify the email and activate the account
+ * will check if the token is not expired and is valid
+ */
+export const getUserByEmailVerificationToken = async (token: string) => {
+  return await User.findOne({
+    emailVerificationToken: token,
+    emailVerificationTokenExpiresAt: { $gt: new Date() },
+  });
+};
+
+/**
  * Create and save a new user
  */
 export const createUser = async (values: Record<string, any>) => {

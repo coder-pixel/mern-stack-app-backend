@@ -3,6 +3,9 @@ import { IUser } from "../types";
 import { INDIAN_STATES_AND_UTS } from "../constants";
 export interface IUserType extends Document, IUser {
   // ------- can be used to add additional fields to the user here -------
+  emailVerificationToken?: string;
+  emailVerificationTokenExpiresAt?: Date;
+  isVerified?: boolean;
   // authentication: {
   //   password: string;
   //   salt: string;
@@ -35,6 +38,16 @@ const UserScehma = new mongoose.Schema<IUserType>(
       type: String,
       required: false,
       enum: INDIAN_STATES_AND_UTS,
+    },
+    emailVerificationToken: {
+      type: String,
+    },
+    emailVerificationTokenExpiresAt: {
+      type: Date,
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
     },
     // authentication: {
     //   password: {

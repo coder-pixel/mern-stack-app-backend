@@ -1,9 +1,16 @@
 import { Request, Response } from "express";
 import { User } from "../models/user";
 import { comparePassword, hashPassword } from "../utils/auth";
-import { createUser, getUserByEmail } from "../services/user.service";
+import {
+  createUser,
+  getUserByEmail,
+  getUserByEmailVerificationToken,
+  updateUserById,
+} from "../services/user.service";
 import { AppError } from "../utils/AppError";
 import { generateUserToken } from "../utils";
+import { generateRandomToken } from "../utils/token";
+import { sendVerificationEmail } from "../utils/email";
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   // try {
@@ -27,6 +34,11 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
   const hashed = await hashPassword(password); // hash the password, so that we can store it in db
 
+  const emailVerificationToken = generateRandomToken();
+  const emailVerificationTokenExpiresAt = new Date(
+    Date.now() + 24 * 60 * 60 * 1000
+  ); // 24 hours from now
+
   // create and store a new user in the DB with email and hashed password
   const newUser = await createUser({
     email,
@@ -34,16 +46,23 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     role,
     password: hashed,
     state,
+    emailVerificationToken,
+    emailVerificationTokenExpiresAt,
     // authentication: { password: hashed },
   });
 
-  // now generate jwt token, to be sent back to the client
-  const token = generateUserToken(newUser);
+  // send the verification email to the user
+  await sendVerificationEmail(email, emailVerificationToken);
+
+  // ---------------- now no longer needed to send the token back to the client, as we are sending the email ----------------
+  // // now generate jwt token, to be sent back to the client
+  // const token = generateUserToken(newUser);
 
   // send the token back to the client
-  res
-    .status(201)
-    .json({ token, message: "User created successfully", error: false });
+  res.status(201).json({
+    message: "Registered successfully. Check email to verify your account.",
+    error: false,
+  });
   // } catch (error) {
   //   console.error(error);
   //   res.status(500).json({ error: true, message: "Internal server error" });
@@ -56,6 +75,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
   //   const user = await getUserByEmail(email);
   // const user = await User.findOne({ email }).select("+authentication.password");
+
+  // 1. Find user by email and include password
   const user = await User.findOne({ email }).select("+password"); // added select to include password in the response, so that we can compare it with the hashed password
   if (!user) {
     throw new AppError("User not found", 404);
@@ -63,6 +84,12 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     // return;
   }
 
+  // 2. Check if verified
+  if (!user?.isVerified) {
+    throw new AppError("Please verify your email to login", 403);
+  }
+
+  // 3. Compare passwords and check if valid
   const isPasswordValid = await comparePassword(password, user?.password!);
 
   if (!isPasswordValid) {
@@ -71,6 +98,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     // return;
   }
 
+  // 4. Generate and return JWT
   const token = generateUserToken(user);
 
   res.status(200).json({ error: false, token });
@@ -78,4 +106,35 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   //   console.error(error);
   //   res.status(500).json({ error: true, message: "Internal server error" });
   // }
+};
+
+export const verifyEmail = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const token = req?.query?.token as string;
+  // console.log("Verification email route hit");
+  // console.log("🔥 token:", token);
+
+  if (!token) {
+    throw new AppError("Token is required", 400);
+  }
+
+  const user = await getUserByEmailVerificationToken(token);
+
+  if (!user) {
+    throw new AppError("Invalid or expired token", 400);
+  }
+
+  // update the user's email verification token and email verification token expires at
+  await updateUserById(user?._id, {
+    isVerified: true,
+    emailVerificationToken: null,
+    emailVerificationTokenExpiresAt: null,
+  });
+
+  res.status(200).json({
+    message: "Email verified successfully",
+    error: false,
+  });
 };
