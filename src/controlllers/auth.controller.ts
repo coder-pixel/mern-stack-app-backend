@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { User } from "../models/users";
+import { User } from "../models/user";
 import { comparePassword, generateToken, hashPassword } from "../utils/auth";
 import { createUser, getUserByEmail } from "../services/user.service";
 import { AppError } from "../utils/AppError";

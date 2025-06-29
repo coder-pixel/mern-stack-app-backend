@@ -25,6 +25,11 @@ const UserScehma = new mongoose.Schema<IUserType>(
       enum: ["user", "admin"],
       default: "user",
     },
+    password: {
+      type: String,
+      required: true,
+      select: false,
+    },
     authentication: {
       password: {
         type: String,

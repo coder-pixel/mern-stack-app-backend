@@ -1,4 +1,4 @@
-import { User } from "../models/users";
+import { User } from "../models/user";
 
 /**
  * Get all users (consider adding pagination/filter in future)
