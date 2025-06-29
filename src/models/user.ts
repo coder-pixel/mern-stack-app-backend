@@ -6,6 +6,8 @@ export interface IUserType extends Document, IUser {
   emailVerificationToken?: string;
   emailVerificationTokenExpiresAt?: Date;
   isVerified?: boolean;
+  resetPasswordToken?: string;
+  resetPasswordTokenExpiresAt?: Date;
   // authentication: {
   //   password: string;
   //   salt: string;
@@ -48,6 +50,12 @@ const UserScehma = new mongoose.Schema<IUserType>(
     isVerified: {
       type: Boolean,
       default: false,
+    },
+    resetPasswordToken: {
+      type: String,
+    },
+    resetPasswordTokenExpiresAt: {
+      type: Date,
     },
     // authentication: {
     //   password: {

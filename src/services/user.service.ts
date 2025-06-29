@@ -34,13 +34,19 @@ export const getUserById = async (id: string) => {
 };
 
 /**
- * Get user by email verification token, to verify the email and activate the account
- * will check if the token is not expired and is valid
+ * Get user by type and token
+ * type can be emailVerificationToken or resetPasswordToken or any other token type added to the user model
+ * will check if the token is not expired and is valid,
+ * need to pass the type and token to the function
  */
-export const getUserByEmailVerificationToken = async (token: string) => {
+export const getUserByVerificationTokenType = async (
+  tokenType: string,
+  tokenExpiresAtField: string,
+  token: string
+) => {
   return await User.findOne({
-    emailVerificationToken: token,
-    emailVerificationTokenExpiresAt: { $gt: new Date() },
+    [tokenType]: token,
+    [tokenExpiresAtField]: { $gt: new Date() },
   });
 };
 

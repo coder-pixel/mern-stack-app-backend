@@ -17,13 +17,7 @@ export const sendVerificationEmail = async (to: string, token: string) => {
 
   // Configure email transporter using Gmail SMTP
   // Note: Consider using SendGrid or other production email services for better deliverability
-  const transporter = nodemailer.createTransport({
-    service: "gmail", // or use SendGrid for production
-    auth: {
-      user: process.env.EMAIL_USER, // Gmail account email
-      pass: process.env.EMAIL_PASS, // Gmail app password or OAuth token
-    },
-  });
+  const transporter = getTransporter();
 
   // Send the verification email
   await transporter.sendMail({
@@ -38,5 +32,30 @@ export const sendVerificationEmail = async (to: string, token: string) => {
             <p>Regards,</p>
             <b>Sauvik Kumar Goel</b>
            `, // HTML email body with verification link
+  });
+};
+
+export const sendPasswordResetEmail = async (to: string, token: string) => {
+  const generatedResetUrl = `${BASE_URL}/auth/reset-password?token=${token}`;
+
+  const transporter = getTransporter();
+
+  await transporter.sendMail({
+    from: `"My App" <${process.env.EMAIL_USER}>`,
+    to,
+    subject: "Reset Your Password",
+    html: `<p>Click the link below to reset your password:</p>
+           <a href="${generatedResetUrl}">${generatedResetUrl}</a>
+           <p>This link will expire in 1 hour.</p>`,
+  });
+};
+
+const getTransporter = () => {
+  return nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
   });
 };

@@ -1,8 +1,10 @@
 import { Router } from "express";
 import {
+  forgotPassword,
   login,
   register,
   resendVerificationEmail,
+  resetPassword,
   verifyEmail,
 } from "../../controlllers/auth.controller";
 import { asyncHandler } from "../../utils/asyncHandler";
@@ -20,5 +22,11 @@ router.post(
   "/resend-verification-email",
   asyncHandler(resendVerificationEmail)
 );
+
+// forgot password
+router.post("/forgot-password", asyncHandler(forgotPassword));
+
+// reset password
+router.post("/reset-password", asyncHandler(resetPassword)); // frontend sends ?token=... + new password
 
 export default router;

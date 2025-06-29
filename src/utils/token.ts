@@ -1,4 +1,4 @@
-// generate a token for email verification
+// generate a token for email verification or other similar purposes
 
 import crypto from "crypto";
 

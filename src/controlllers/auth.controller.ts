@@ -4,13 +4,17 @@ import { comparePassword, hashPassword } from "../utils/auth";
 import {
   createUser,
   getUserByEmail,
-  getUserByEmailVerificationToken,
+  getUserByVerificationTokenType,
   updateUserById,
 } from "../services/user.service";
 import { AppError } from "../utils/AppError";
 import { generateUserToken } from "../utils";
 import { generateRandomToken } from "../utils/token";
-import { sendVerificationEmail } from "../utils/email";
+import { sendPasswordResetEmail, sendVerificationEmail } from "../utils/email";
+import {
+  EMAIL_VERIFICATION_EXPIRATION_TIME,
+  RESET_PASSWORD_EXPIRATION_TIME,
+} from "../config";
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   // try {
@@ -36,7 +40,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
   const emailVerificationToken = generateRandomToken();
   const emailVerificationTokenExpiresAt = new Date(
-    Date.now() + 24 * 60 * 60 * 1000
+    Date.now() + EMAIL_VERIFICATION_EXPIRATION_TIME
   ); // 24 hours from now
 
   // create and store a new user in the DB with email and hashed password
@@ -116,23 +120,30 @@ export const verifyEmail = async (
   // console.log("Verification email route hit");
   // console.log("🔥 token:", token);
 
+  // 1. Check if token is provided
   if (!token) {
     throw new AppError("Token is required", 400);
   }
 
-  const user = await getUserByEmailVerificationToken(token);
+  // 2. Check if user exists and token is valid and not expired
+  const user = await getUserByVerificationTokenType(
+    "emailVerificationToken",
+    "emailVerificationTokenExpiresAt",
+    token
+  );
 
   if (!user) {
     throw new AppError("Invalid or expired token", 400);
   }
 
-  // update the user's email verification token and email verification token expires at
+  // 3. Update the user's email verification token and email verification token expires at
   await updateUserById(user?._id, {
     isVerified: true,
     emailVerificationToken: null,
     emailVerificationTokenExpiresAt: null,
   });
 
+  // 4. Send success response
   res.status(200).json({
     message: "Email verified successfully",
     error: false,
@@ -164,7 +175,7 @@ export const resendVerificationEmail = async (
   // 4. Generate new verification token and expiration date
   const generatedToken = generateRandomToken();
   const emailVerificationTokenExpiresAt = new Date(
-    Date.now() + 24 * 60 * 60 * 1000
+    Date.now() + EMAIL_VERIFICATION_EXPIRATION_TIME
   ); // 24 hours from now
 
   // 5. Update user with new verification token and expiration date
@@ -178,6 +189,88 @@ export const resendVerificationEmail = async (
 
   res.status(200).json({
     message: "Verification email resent successfully",
+    error: false,
+  });
+};
+
+export const forgotPassword = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { email } = req?.body;
+
+  // 1. Check if token and password are provided
+  if (!email) {
+    throw new AppError("Email is required", 400);
+  }
+
+  // 2. Check if user exists
+  const user = await getUserByEmail(email);
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  // 3. Generate new reset password token and expiration date
+  const generatedToken = generateRandomToken();
+  const resetPasswordTokenExpiresAt = new Date(
+    Date.now() + RESET_PASSWORD_EXPIRATION_TIME
+  );
+
+  // 4. Update user with new reset password token and expiration date
+  await updateUserById(user?._id, {
+    resetPasswordToken: generatedToken,
+    resetPasswordTokenExpiresAt,
+  });
+
+  // 5. Send reset password email
+  await sendPasswordResetEmail(email, generatedToken);
+
+  res.status(200).json({
+    message: "Reset password email sent successfully",
+    error: false,
+  });
+};
+
+export const resetPassword = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { token, password } = req?.body;
+
+  // 1. Check if token and password are provided
+  if (!token || !password) {
+    throw new AppError("Missing token or password", 400);
+  }
+
+  // 2. Check if user exists and token is valid and not expired
+  const user = await getUserByVerificationTokenType(
+    "resetPasswordToken",
+    "resetPasswordTokenExpiresAt",
+    token
+  );
+
+  if (!user) {
+    throw new AppError("Invalid or expired token", 400);
+  }
+
+  // 3. Check if password is provided
+  if (!password) {
+    throw new AppError("Password is required", 400);
+  }
+
+  // 4. Hash the password
+  const hashedPassword = await hashPassword(password);
+
+  // 5. Update user with new password
+  await updateUserById(user?._id, {
+    password: hashedPassword,
+    resetPasswordToken: null,
+    resetPasswordTokenExpiresAt: null,
+  });
+
+  // 6. Send success response
+  res.status(200).json({
+    message: "Password reset successfully",
     error: false,
   });
 };
