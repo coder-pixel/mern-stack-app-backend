@@ -20,11 +20,11 @@ export const getUserByEmail = async (email: string) => {
  * Get user by session token
  */
 // used to validate user session
-export const getUserBySessionToken = async (sessionToken: string) => {
-  return await User.findOne({
-    "authentication.sessionToken": sessionToken,
-  });
-};
+// export const getUserBySessionToken = async (sessionToken: string) => {
+//   return await User.findOne({
+//     "authentication.sessionToken": sessionToken,
+//   });
+// };
 
 /**
  * Get user by ID

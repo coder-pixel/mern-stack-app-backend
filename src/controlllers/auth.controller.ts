@@ -31,7 +31,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     email,
     username,
     role,
-    authentication: { password: hashed },
+    password: hashed,
+    // authentication: { password: hashed },
   });
 
   // now generate jwt token, to be sent back to the client
@@ -57,17 +58,15 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;
 
   //   const user = await getUserByEmail(email);
-  const user = await User.findOne({ email }).select("+authentication.password");
+  // const user = await User.findOne({ email }).select("+authentication.password");
+  const user = await User.findOne({ email }).select("+password"); // added select to include password in the response, so that we can compare it with the hashed password
   if (!user) {
     throw new AppError("User not found", 404);
     // res.status(404).json({ error: true, message: "User not found" });
     // return;
   }
 
-  const isPasswordValid = await comparePassword(
-    password,
-    user?.authentication?.password
-  );
+  const isPasswordValid = await comparePassword(password, user?.password!);
 
   if (!isPasswordValid) {
     throw new AppError("Invalid credentials", 401);

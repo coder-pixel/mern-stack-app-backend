@@ -11,6 +11,9 @@ export const comparePassword = async (
   plainPassword: string,
   hashedPassword: string
 ): Promise<boolean> => {
+  // console.log("plainPassword", plainPassword);
+  // console.log("hashedPassword", hashedPassword);
+  // ✅ bcrypt.compare() is used to compare the plain password with the hashed password
   return await bcrypt.compare(plainPassword, hashedPassword);
 };
 
