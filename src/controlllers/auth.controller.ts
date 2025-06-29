@@ -138,3 +138,46 @@ export const verifyEmail = async (
     error: false,
   });
 };
+
+export const resendVerificationEmail = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { email } = req.body;
+
+  // 1. Check if email is provided
+  if (!email) {
+    throw new AppError("Email is required", 400);
+  }
+
+  // 2. Check if user exists
+  const user = await getUserByEmail(email);
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  // 3. Check if user is verified
+  if (user?.isVerified) {
+    throw new AppError("User already verified", 400);
+  }
+
+  // 4. Generate new verification token and expiration date
+  const generatedToken = generateRandomToken();
+  const emailVerificationTokenExpiresAt = new Date(
+    Date.now() + 24 * 60 * 60 * 1000
+  ); // 24 hours from now
+
+  // 5. Update user with new verification token and expiration date
+  await updateUserById(user?._id, {
+    emailVerificationToken: generatedToken,
+    emailVerificationTokenExpiresAt,
+  });
+
+  // 6. Send verification email
+  await sendVerificationEmail(email, generatedToken);
+
+  res.status(200).json({
+    message: "Verification email resent successfully",
+    error: false,
+  });
+};

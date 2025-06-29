@@ -30,13 +30,13 @@ export const sendVerificationEmail = async (to: string, token: string) => {
     from: `"My Express App" <${process.env.EMAIL_USER}>`, // Sender name and email
     to, // Recipient email address
     subject: "Verify Your Email", // Email subject line
-    html: `<p>Please verify your email by clicking this link:</p>
-           <a href="${generatedVerifyUrl}">${generatedVerifyUrl}</a>, 
-           to continue using the app
-           <br>
-           <br>
-           <p>Regards,</p>
-           <b>Sauvik Kumar Goel</b>
+    html: `
+            <p>Please verify your email by clicking this link:</p>
+            <a href="${generatedVerifyUrl}">${generatedVerifyUrl}</a>, 
+            <br>
+            <br>
+            <p>Regards,</p>
+            <b>Sauvik Kumar Goel</b>
            `, // HTML email body with verification link
   });
 };
