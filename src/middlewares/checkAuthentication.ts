@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { AppError } from "../utils/AppError";
 import jwt from "jsonwebtoken";
 import { IUser } from "../types";
+import { JWT_SECRET } from "../config";
 
 export interface AuthenticatedRequest extends Request {
   user?: IUser;
@@ -27,7 +28,7 @@ export const checkAuthentication = (
   }
 
   // verify the token
-  const decoded = jwt.verify(token, process.env.JWT_SECRET!) as IUser;
+  const decoded = jwt.verify(token, JWT_SECRET!) as IUser;
 
   if (!decoded) {
     throw new AppError("Unauthorized", 401);

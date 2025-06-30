@@ -4,7 +4,7 @@
  */
 
 import nodemailer from "nodemailer";
-import { BASE_URL } from "../config";
+import { BASE_URL, EMAIL_PASS, EMAIL_USER } from "../config";
 
 /**
  * Sends a verification email to the user with a verification link
@@ -21,7 +21,7 @@ export const sendVerificationEmail = async (to: string, token: string) => {
 
   // Send the verification email
   await transporter.sendMail({
-    from: `"My Express App" <${process.env.EMAIL_USER}>`, // Sender name and email
+    from: `"My Express App" <${EMAIL_USER}>`, // Sender name and email
     to, // Recipient email address
     subject: "Verify Your Email", // Email subject line
     html: `
@@ -41,7 +41,7 @@ export const sendPasswordResetEmail = async (to: string, token: string) => {
   const transporter = getTransporter();
 
   await transporter.sendMail({
-    from: `"My App" <${process.env.EMAIL_USER}>`,
+    from: `"My App" <${EMAIL_USER}>`,
     to,
     subject: "Reset Your Password",
     html: `<p>Click the link below to reset your password:</p>
@@ -54,8 +54,8 @@ const getTransporter = () => {
   return nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
+      user: EMAIL_USER,
+      pass: EMAIL_PASS,
     },
   });
 };

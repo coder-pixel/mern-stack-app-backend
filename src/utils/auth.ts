@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { JWT_SECRET } from "../config";
 
 const SALT_ROUNDS = 10;
 
@@ -18,7 +19,7 @@ export const comparePassword = async (
 };
 
 export const generateToken = (payload: object): string => {
-  return jwt.sign(payload, process.env.JWT_SECRET!, {
+  return jwt.sign(payload, JWT_SECRET!, {
     expiresIn: "1d", // Adjust as needed
   });
 };
