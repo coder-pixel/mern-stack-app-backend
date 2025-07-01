@@ -9,10 +9,13 @@ import { connectDB } from "./config/db";
 import routes from "./routes";
 import { errorHandler } from "./middlewares/errorHandler";
 import { CLIENT_URL, PORT } from "./config";
-
+import logger from "./middlewares/logger";
+import helmet from "helmet";
 // require("dotenv").config(); // Load environment variables - need to be at top
 
 const app = express();
+
+app.use(logger);
 
 app.use(
   cors({
@@ -24,6 +27,7 @@ app.use(
 app.use(compression());
 app.use(cookieParser()); // used when working with cookies
 app.use(bodyParser.json());
+app.use(helmet());
 
 const port = PORT || 8080;
 

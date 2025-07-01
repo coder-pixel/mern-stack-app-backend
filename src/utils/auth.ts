@@ -20,7 +20,7 @@ export const comparePassword = async (
 
 export const generateToken = (payload: object): string => {
   return jwt.sign(payload, JWT_SECRET!, {
-    expiresIn: "1d", // Adjust as needed
+    expiresIn: "30d", // Adjust as needed, will be used to set the expiration time of the token, token cannot be used after the expiration time, so adjust it accordingly
   });
 };
 
