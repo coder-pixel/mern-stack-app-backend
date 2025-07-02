@@ -18,7 +18,7 @@ import {
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   // try {
-  const { email, password, username, role, state } = req.body;
+  const { email, password, username, role, state, name } = req.body;
 
   if (!email || !username || !password) {
     throw new AppError("Some required fields are missing", 400);
@@ -48,6 +48,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     email,
     username,
     role,
+    name,
     password: hashed,
     state,
     emailVerificationToken,
