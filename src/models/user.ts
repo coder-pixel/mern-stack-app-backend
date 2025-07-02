@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { IUser, UserRole } from "../types";
+import { IUser, UserRoleEnum } from "../types";
 import { INDIAN_STATES_AND_UTS } from "../constants";
 
 export interface IUserType extends Document, IUser {
@@ -36,11 +36,15 @@ const UserScehma = new mongoose.Schema<IUserType>(
       type: String,
       default: "",
     },
+    document: {
+      type: String,
+      default: "",
+    },
     role: {
       type: String,
       required: true,
-      enum: [UserRole.User, UserRole.Admin, UserRole.Manager],
-      default: UserRole.User,
+      enum: [UserRoleEnum.User, UserRoleEnum.Admin, UserRoleEnum.Manager],
+      default: UserRoleEnum.User,
     },
     password: {
       type: String,

@@ -34,7 +34,7 @@ export const checkAuthentication = (
     throw new AppError("Unauthorized", 401);
   }
 
-  console.log("🔥 decoded:", decoded);
+  // console.log("🔥 decoded:", decoded);
 
   req.user = decoded;
 
