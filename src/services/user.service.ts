@@ -1,10 +1,60 @@
 import { User } from "../models/user";
+import { IUser } from "../types";
 
 /**
  * Get all users (consider adding pagination/filter in future)
+ * @param params - parameters
+ * @param params.skip - skip
+ * @param params.limit - limit
+ * @param params.filter - filter
+ * @param params.sortBy - sort by
+ * @param params.sortOrder - sort order
+ * @returns users
  */
-export const getUsers = async () => {
-  return await User.find();
+export const getUsers = async (params: {
+  skip?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: number;
+  filter?: Record<string, any>;
+}): Promise<IUser[]> => {
+  const { skip, limit, sortBy, sortOrder, filter } = params;
+
+  // 1. Build the query
+  let query = User.find(); // initial query
+
+  // 2. Add filters if provided (should be applied early to narrow down the dataset)
+  if (filter) {
+    query = query.find(filter);
+  }
+
+  // 3. Add sorting if provided (should be applied before skip/limit)
+  if (sortBy && typeof sortOrder === "number") {
+    query = query.sort({ [sortBy]: sortOrder as 1 | -1 });
+  }
+  // 4. Add pagination if provided (should be applied after filtering and sorting)
+  // Apply skip and limit only if they are provided and valid
+  if (limit && limit > 0) {
+    query = query.limit(limit);
+  }
+  if (skip && skip >= 0) {
+    query = query.skip(skip);
+  }
+
+  // 5. Execute the query
+  const users = await query;
+
+  // 6. Return the users
+  return users;
+};
+
+/**
+ * Get total users,
+ * @param filter - filter object
+ * @returns total users
+ */
+export const getTotalUsers = async (filter: Record<string, any>) => {
+  return await User.countDocuments(filter); // ✅ Use countDocuments for total count, it's more efficient than find()
 };
 
 /**
