@@ -10,14 +10,19 @@ import {
 import { asyncHandler } from "../../utils/asyncHandler";
 import { registerSchema } from "../../validations/auth.schema";
 import { validateRequest } from "../../middlewares/validateRequest";
+import { uploadImageToCloudinary } from "../../middlewares/cloudinaryUpload";
 
 const router = Router();
 
+// register
 router.post(
   "/register",
-  validateRequest(registerSchema) as any,
+  uploadImageToCloudinary.single("profileImage"), // this populates req.body
+  validateRequest(registerSchema) as any, // now Zod can work with req.body
   asyncHandler(register)
 );
+
+// login
 router.post("/login", asyncHandler(login));
 
 // verify email

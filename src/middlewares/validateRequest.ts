@@ -15,11 +15,11 @@ export const validateRequest =
       next();
     } catch (error: any) {
       console.log({ error });
-      return res.status(400).json({
-        error: true,
-        message: error?.message || "Validation failed",
-        issues: error?.errors,
-      });
+      // return res.status(400).json({
+      //   error: true,
+      //   message: error?.message || "Validation failed",
+      //   issues: error?.errors,
+      // });
 
       throw new AppError(error?.message || "Validation failed", 400);
     }

@@ -11,4 +11,5 @@ export interface IUser {
   role: UserRole;
   password?: string;
   state?: string;
+  profileImage?: string;
 }

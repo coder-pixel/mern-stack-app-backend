@@ -32,6 +32,10 @@ const UserScehma = new mongoose.Schema<IUserType>(
       type: String,
       required: true,
     },
+    profileImage: {
+      type: String,
+      default: "",
+    },
     role: {
       type: String,
       required: true,

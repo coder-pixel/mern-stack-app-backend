@@ -38,6 +38,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
   const hashed = await hashPassword(password); // hash the password, so that we can store it in db
 
+  const profileImage = (req.file as any)?.path || ""; // get Cloudinary URL if file is uploaded and processed by cloudinary middleware
+
   const emailVerificationToken = generateRandomToken();
   const emailVerificationTokenExpiresAt = new Date(
     Date.now() + EMAIL_VERIFICATION_EXPIRATION_TIME
@@ -51,6 +53,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     name,
     password: hashed,
     state,
+    profileImage,
     emailVerificationToken,
     emailVerificationTokenExpiresAt,
     // authentication: { password: hashed },
