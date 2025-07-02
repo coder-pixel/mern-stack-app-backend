@@ -8,10 +8,16 @@ import {
   verifyEmail,
 } from "../../controlllers/auth.controller";
 import { asyncHandler } from "../../utils/asyncHandler";
+import { registerSchema } from "../../validations/auth.schema";
+import { validateRequest } from "../../middlewares/validateRequest";
 
 const router = Router();
 
-router.post("/register", asyncHandler(register));
+router.post(
+  "/register",
+  validateRequest(registerSchema) as any,
+  asyncHandler(register)
+);
 router.post("/login", asyncHandler(login));
 
 // verify email
